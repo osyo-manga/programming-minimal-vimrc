@@ -32,28 +32,35 @@ if has('vim_starting')
 	" set compatible
 endif
 
-
+" プラグイン管理をするために git が必須
 if !executable("git")
 	echo "Please install git."
 	finish
 endif
 
-" reset augroup
+" augroup の設定が重複しないように初期化
+" vimrc 内では my_vimrc グループを使用する
 augroup my_vimrc
 	autocmd!
 augroup END
+
+" vimrc 内で設定する autocmd のラッパー
+" my_vimrc 省略用
 command! -bang -nargs=*
 \   MyAutoCmd
 \   autocmd<bang> my_vimrc <args>
 
+
 "//////////////////////////////////////////////////////////
 "
-" 各種環境変数の設定
+" 設定変数
 "
 "//////////////////////////////////////////////////////////
 
 " プラグインの保存ディレクトリ
 let s:vimplugin_dir = expand(exists("$VIMPLUGIN_DIR") ? $VIMPLUGIN_DIR : '~/.vim/bundle')
+
+" vimrc 本体のパス
 let s:vimrc = expand("<sfile>:p")
 
 
@@ -63,6 +70,7 @@ let s:vimrc = expand("<sfile>:p")
 "
 "//////////////////////////////////////////////////////////
 
+" dein.vim がインストールされてなければ自動でインストールを行う
 let s:dein_dir = s:vimplugin_dir . "/dein.vim"
 if !isdirectory(s:dein_dir)
 	echo "Please install dein.vim."
@@ -74,13 +82,14 @@ if !isdirectory(s:dein_dir)
 
 			let cmd = "!git clone git://github.com/Shougo/dein.vim "
 			\ . s:dein_dir
-			echom cmd
 			call execute(cmd)
 			echom "dein.vim installed. Please restart vim."
 		else
 			echom "Canceled."
 		endif
 	endfunction
+
+	" dein.vim のインストールは Vim の起動後に行う
 	augroup install-dein
 		autocmd!
 		autocmd VimEnter * call s:install_dein()
@@ -233,7 +242,7 @@ vnoremap <silent> k gk
 "
 "//////////////////////////////////////////////////////////
 
-" vimrc を編集するコマンド
+" vimrc を開いてさっと編集するためのコマンド
 command! EditVimrc execute ":tab drop " . expand(s:vimrc)
 
 " vimrc を保存したら自動的に vimrc を再読込する
